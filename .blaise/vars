@@ -1,0 +1,60 @@
+# This is a environment variable configuration file for blaise
+# Each project you make will probably have one.
+# Variables created inside this file can be referenced by variables created
+# later by using the $var_name syntax.
+
+
+# title is a descriptive title and can contain spaces
+title=Analysis Server
+
+
+
+# name should be the name of the file you type to launch the node server
+# (i.e., node app_name). It really shouldn't contain spaces
+name=analysis_server
+
+
+
+# The nodeServerAddr is the address at which the application that you're
+# developing will be listening for client connections. This is needed
+# for debugging. If you're application has no front end, leave this blank.
+nodeServerAddr=localhost:3000
+
+# The debugURL is the page that the client debug instance is directed to
+# once it opens. You can leave this blank if you want to direct to index
+debugURL=
+
+
+# These are file extensions that will be queried in a find-in-files search
+
+includeExts= js, css, txt, jade, less, inc, html
+
+
+
+# excludes removes the listed directories from search and goto
+
+excludes= node_modules , node_modules/fusion/node_modules
+
+
+
+# includes adds listed directories to search and goto
+# includes happens after excludes and is a mechanism of adding subdirectories
+# from parent directories that were excluded
+
+includes= node_modules/analysis , routes , node_modules/fusion
+
+
+
+# publicDir specifies the directory from which public files are served.
+# This is needed for the devtools ide to save files to the proper location
+
+publicDir=public
+
+
+# By default, the same profile is used for every project to display the actual
+# content rendered by the node server (i.e., the debug preview for the site).
+# If for some reason you need to display multiple projects at once, uncomment
+# the second line
+
+#debugProfile=blaise_debug_$name
+

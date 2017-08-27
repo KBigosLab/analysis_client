@@ -1,2 +1,2 @@
-# analysis_client
-Client for distributed nonmem analysis
+# analysis_server
+Server for managing analysis checkouts and data uploads
