@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/KBigosLab/analysis_server",
   "dependencies": {
+    "app-module-path": "^2.2.0",
     "body-parser": "^1.17.2",
     "connect-redis": "~1.4.5",
     "cookie-parser": "^1.4.3",

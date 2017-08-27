@@ -1,4 +1,6 @@
 
+require('app-module-path').addPath('local');
+
 require('debug-trace')({
   always: true,
 })
