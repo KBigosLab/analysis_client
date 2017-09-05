@@ -33,7 +33,7 @@ includeExts= js, css, txt, jade, less, inc, html
 
 # excludes removes the listed directories from search and goto
 
-excludes= node_modules , node_modules/fusion/node_modules
+excludes= node_modules , local/fusion/node_modules
 
 
 
