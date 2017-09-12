@@ -64,12 +64,12 @@ function cloneDrugModel(nodeName,analysis) {
   fs.writeFile(path.join(analysisDir,model.name+'.csv'),outputCSV);
 }
 
-function startAnalysis(nodeName,analysis) {
+function startAnalysis(workerID,nodeName,analysis) {
 
   // Get drug model for the analysis
   cloneDrugModel(nodeName,analysis);
 
-  var instance = new AnalysisInstance(nodeName,analysis.job.jobID);
+  var instance = new AnalysisInstance(workerID,analysis.model.key,nodeName,analysis.job.jobID);
   instance.run();
 
   instance.waitForResults();
@@ -91,7 +91,7 @@ exports.main = function() {
     ip: '127.0.0.1',
   }));
 
-  if (res && res.model) startAnalysis('Analysis_Node1',res)
+  if (res && res.model) startAnalysis(res.workerID,'Analysis_Node1',res)
   else console.log('No available jobs.');
 
 //  startAnalysis('Analysis_Node1');

@@ -2,9 +2,13 @@
 var fs = require('fusion/fs');
 var path = require('path');
 var sleep = require('fusion/sleep');
+var http = require('fusion/http');
 var Shell = require('fusion/Shell');
+var s3 = require('analysis/s3');
 
-function Instance(node,id) {
+function Instance(workerID,modelKey,node,id) {
+  this.workerID = workerID;
+  this.modelKey = modelKey;
   this.node = node;
   this.id = id;
   this.analysisDir = path.join(Const.workspaceDir,node,''+id);
@@ -40,18 +44,30 @@ Instance.prototype.waitForResults = function() {
 function convert2obj(lines) {
   var obj = {};
   for (var k in lines) {
-    var parts = lines[k].split('=');
-    obj[parts[0]] = parts[1];
+    if (lines[k]) {
+      var parts = lines[k].split('=');
+      obj[parts[0]] = parts[1];
+    }
   }
   return obj;
 }
 
+Instance.prototype.pushNonmemResult = function(name) {
+  s3.gzipAndPush(path.join(this.analysisDir,'NONMEM.g77',name),path.join(this.modelKey,'results',''+this.id,name));
+}
+
 Instance.prototype.pushResults = function() {
+
+  // Post summary
   var summary = convert2obj(fs.readFile(this.file('Summary.txt'),'utf8').split('\r\n'));
   http.post(Const.analysisServer+'submitJob',{
-    id: this.id,
-    data: summary,
+    workerID: this.workerID,
+    jobID: this.id,
+    summary: summary,
   });
+
+  // Upload fit file
+  this.pushNonmemResult('nonmem.fit');
 }
 
 module.exports = Instance;
