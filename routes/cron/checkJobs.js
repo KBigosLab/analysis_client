@@ -1,22 +1,29 @@
 
-var jobman = require('analysis/jobman');
+var client = require('analysis/client');
+var http = require('fusion/http');
 
 // This sets how often checkJobs runs
 exports.schedule = '* * * * * *';
 
-// This will be set to false as soon as the script initializes. When it's true,
-// it prevents subsequent calls from triggering the script (the currently
-// running script gets an exclusive lock).
+// Set to false after initialization. While true, subsequent cron calls won't be able
+// to run this script
 exports.exclusive = true;
 
 function initialize() {
+  // Initialize the client
+  client.init();
+  exports.exclusive = false;
 }
 
 exports.main = function($C) {
   if ($C.count == 0) initialize();
 
-  // Get a new task
-  var job = jobman.getJob();
+  if (client.workerID && !client.isWaiting()) {
+    var res = JSON.parse(http.post(Const.analysisServer+'nextJob',{
+      workerID: client.workerID,
+    }));
 
+    if (res && res.model) client.process(res);
+  }
 }
 
