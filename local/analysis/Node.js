@@ -49,8 +49,11 @@ Node.prototype.copyDrugModel = function(analysis) {
   for (var k=1;k<rows.length;k++) {
     var id = rows[k][0];
     rows[k][0] = id2idx[id];
-    rows[k].push(analysis.regressor[id]);
-    outputCSV += rows[k].join(',')+'\r\n';
+    var geneValue = analysis.regressor[id];
+    if (geneValue != -1) {
+      rows[k].push(geneValue);
+      outputCSV += rows[k].join(',')+'\r\n';
+    }
   }
   fs.writeFile(path.join(analysisDir,model.name+'.csv'),outputCSV);
 }

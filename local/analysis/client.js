@@ -5,6 +5,7 @@ var sleep = require('fusion/sleep');
 var http = require('fusion/http');
 var path = require('path');
 var fs = require('fusion/fs');
+var ip = require('ip');
 
 var modelFiles = ['Fields.txt','%.csv','%.fit.txt','%_0.ctl','%_1.ctl','%.base.txt'];
 
@@ -20,7 +21,7 @@ function addNode(name) {
 exports.init = function() {
 
   var res = JSON.parse(http.post(Const.analysisServer+'registerWorker',{
-    ip: '127.0.0.1'
+    ip: ip.address(),
   }));
 
   if (res && res.workerID) {

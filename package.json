@@ -28,6 +28,7 @@
     "express-session": "^1.15.3",
     "express-subdomain": "^1.0.5",
     "fibers": "~1.0.0",
+    "ip": "^1.1.5",
     "jade": "~0.27.7",
     "moment": "^2.18.1",
     "moment-timezone": "^0.5.13",
