@@ -80,6 +80,11 @@ Node.prototype.run = function(analysis) {
   console.log('Done with analysis: Ran in '+(stopTime-startTime)+'ms');
   console.log('**************************************');
 
+  // Remove analysis directory
+  var shell = new Shell();
+  shell.cd(path.join(Const.workspaceDir,this.name));
+  shell.run('rm -rf '+analysis.job.jobID,[]);
+
   // Free the node to do another job
   this.isRunning = false;
 }
