@@ -37,6 +37,7 @@
     "passport": "^0.2.0",
     "passport-google-oauth": "^0.1.5",
     "ua-parser": "^0.3.3",
+    "underscore": "^1.8.3",
     "validator": "^3.17.0"
   }
 }

@@ -3,7 +3,7 @@ var client = require('analysis/client');
 var http = require('fusion/http');
 
 // This sets how often checkJobs runs
-exports.schedule = '* * * * * *';
+exports.schedule = '*/2 * * * * *';
 
 // Set to false after initialization. While true, subsequent cron calls won't be able
 // to run this script
