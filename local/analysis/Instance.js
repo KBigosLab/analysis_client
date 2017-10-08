@@ -55,7 +55,7 @@ function convert2obj(lines) {
 
 Instance.prototype.pushNonmemResult = function(name) {
   var filename = path.join(this.analysisDir,'NONMEM.g77',name);
-  if (fs.exists(filename)) s3.gzipAndPush(filename,path.join(this.modelKey,'results',''+this.id,name));
+  if (fs.exists(filename)) s3.gzipAndPush(filename,path.join(this.modelKey,'results',''+this.id,name.toLowerCase()));
 }
 
 Instance.prototype.getSummary = function() {
