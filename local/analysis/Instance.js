@@ -63,10 +63,12 @@ Instance.prototype.getSummary = function() {
 }
 
 Instance.prototype.remove = function() {
-/*  // Remove analysis directory
-  var shell = new Shell();
-  shell.cd(path.join(Const.workspaceDir,this.node));
-  shell.run('rm -rf '+this.name,[]);*/
+  if (Const.discardLocalWork) {
+    // Remove analysis directory
+    var shell = new Shell();
+    shell.cd(path.join(Const.workspaceDir,this.node));
+    shell.run('rm -rf '+this.name,[]);
+  }
 }
 
 Instance.prototype.pushResults = function() {
