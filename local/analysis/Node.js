@@ -1,5 +1,5 @@
 
-var http = require('fusion/http');
+var server = require('analysis/server');
 var AnalysisInstance = require('analysis/Instance');
 var fs = require('fusion/fs');
 var csv = require('fusion/csv');

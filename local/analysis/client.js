@@ -2,7 +2,7 @@
 var AnalysisNode = require('analysis/Node');
 var Shell = require('fusion/Shell');
 var sleep = require('fusion/sleep');
-var http = require('fusion/http');
+var server = require('analysis/server');
 var path = require('path');
 var fs = require('fusion/fs');
 var ip = require('ip');
@@ -20,9 +20,9 @@ function addNode(name) {
 
 exports.init = function() {
 
-  var res = JSON.parse(http.post(Const.analysisServer+'registerWorker',{
+  var res = server.post('registerWorker',{
     ip: ip.address(),
-  }));
+  });
 
   if (res && res.workerID) {
     exports.workerID = res.workerID;

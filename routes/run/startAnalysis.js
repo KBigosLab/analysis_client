@@ -1,13 +1,13 @@
 
 var client = require('analysis/client');
-var http = require('fusion/http');
+var server = require('analysis/server');
 
 exports.main = function() {
   var workerID = client.init();
   if (workerID) {
-    var res = JSON.parse(http.post(Const.analysisServer+'nextJob',{
+    var res = server.post('nextJob',{
       workerID: workerID,
-    }));
+    });
 
     if (res && res.model) client.process(res)
     else console.log('No available jobs.');

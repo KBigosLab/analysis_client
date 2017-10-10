@@ -2,7 +2,7 @@
 var fs = require('fusion/fs');
 var path = require('path');
 var sleep = require('fusion/sleep');
-var http = require('fusion/http');
+var server = require('analysis/server');
 var Shell = require('fusion/Shell');
 var s3 = require('analysis/s3');
 
@@ -75,7 +75,7 @@ Instance.prototype.pushResults = function() {
 
   // Post summary
   var summary = this.getSummary();
-  http.post(Const.analysisServer+'submitJob',{
+  server.post('submitJob',{
     workerID: this.workerID,
     jobID: this.id,
     summary: summary,
