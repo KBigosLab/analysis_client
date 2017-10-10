@@ -1,6 +1,6 @@
 
 var client = require('analysis/client');
-var http = require('fusion/http');
+var server = require('analysis/server');
 
 // This sets how often checkJobs runs
 exports.schedule = '*/2 * * * * *';
@@ -19,9 +19,9 @@ exports.main = function($C) {
   if ($C.count == 0) initialize();
 
   if (client.workerID && !client.isWaiting()) {
-    var res = JSON.parse(http.post(Const.analysisServer+'nextJob',{
+    var res = server.post('nextJob',{
       workerID: client.workerID,
-    }));
+    });
 
     if (res && res.model) client.process(res);
   }
