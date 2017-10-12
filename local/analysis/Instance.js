@@ -6,13 +6,14 @@ var server = require('analysis/server');
 var Shell = require('fusion/Shell');
 var s3 = require('analysis/s3');
 
-function Instance(workerID,modelKey,node,id,name) {
+function Instance(workerID,workspaceDir,modelKey,node,id,name) {
   this.workerID = workerID;
+  this.workspaceDir = workspaceDir;
   this.modelKey = modelKey;
   this.node = node;
   this.id = id;
   this.name = name;
-  this.analysisDir = path.join(Const.workspaceDir,node,''+name);
+  this.analysisDir = path.join(this.workspaceDir,node,''+name);
 }
 
 Instance.prototype.file = function(name) {
@@ -66,7 +67,7 @@ Instance.prototype.remove = function() {
   if (Const.discardLocalWork) {
     // Remove analysis directory
     var shell = new Shell();
-    shell.cd(path.join(Const.workspaceDir,this.node));
+    shell.cd(path.join(this.workspaceDir,this.node));
     shell.run('rm -rf '+this.name,[]);
   }
 }

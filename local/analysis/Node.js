@@ -7,9 +7,10 @@ var path = require('path');
 var _ = require('underscore');
 var Shell = require('fusion/Shell');
 
-function Node(workerID,name) {
+function Node(workerID,name,workspaceDir) {
   this.workerID = workerID;
   this.name = name;
+  this.workspaceDir = workspaceDir;
 }
 
 function computeIds(rows) {
@@ -33,7 +34,7 @@ Node.prototype.copyDrugModel = function(analysis,analysisName,options) {
   var shell = new Shell();
 
   // Copy files from the drug model directory to the directory for analysis
-  var analysisDir = path.join(Const.workspaceDir,this.name,analysisName);
+  var analysisDir = path.join(this.workspaceDir,this.name,analysisName);
   if (!fs.exists(analysisDir)) fs.mkdir(analysisDir);
   shell.cd(analysisDir);
 
@@ -113,14 +114,14 @@ Node.prototype.analyze = function(analysis,options) {
 
   // Make sure an old analysis directory isn't present
   var shell = new Shell();
-  shell.cd(path.join(Const.workspaceDir,this.name));
+  shell.cd(path.join(this.workspaceDir,this.name));
   shell.run('rm -rf '+analysisName,[]);
 
   // Get drug model for the analysis
   this.copyDrugModel(analysis,analysisName,options);
 
   // Run an analysis instance
-  var instance = new AnalysisInstance(this.workerID,analysis.model.key,this.name,analysis.job.jobID,analysisName);
+  var instance = new AnalysisInstance(this.workerID,this.workspaceDir,analysis.model.key,this.name,analysis.job.jobID,analysisName);
   instance.run();
 
   instance.waitForResults();

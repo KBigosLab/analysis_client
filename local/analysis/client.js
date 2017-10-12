@@ -14,8 +14,8 @@ var nodes = [];
 
 exports.workerID = null;
 
-function addNode(name) {
-  nodes.push(new AnalysisNode(exports.workerID,name));
+function addNode(name,workspaceDir) {
+  nodes.push(new AnalysisNode(exports.workerID,name,workspaceDir));
 }
 
 exports.init = function() {
@@ -27,8 +27,8 @@ exports.init = function() {
   if (res && res.workerID) {
     exports.workerID = res.workerID;
 
-    for (var k=1;k<=Const.nodeCount;k++)
-      addNode('Analysis_Node'+k);
+    for (var k in Const.nodes)
+      addNode(Const.nodes[k].name,Const.nodes[k].workspace);
 
     return res.workerID;
   }
