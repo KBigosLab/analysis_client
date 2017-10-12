@@ -24,5 +24,5 @@ vboxmanage controlvm $VM poweroff
 ## Unregister vm and change vm uuid
 ```
 vboxmanage unregistervm $VM
-vboxmanage internalcommands setvdiuuid disk-name.vdi 
+vboxmanage internalcommands sethduuid disk-name.vdi 
 ```
