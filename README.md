@@ -13,7 +13,7 @@ VM=Virtual Machine Name
 vboxmanage createvm --name $VM --ostype "WindowsXP" --register
 vboxmanage storagectl $VM --name "IDE" --add ide --controller PIIX4
 vboxmanage storageattach $VM --storagectl "IDE" --port 0 --device 0 --type hdd --medium /path/to/vm/directory
-vboxmanage modifyvm $VM --memory 256 --vram 16
+vboxmanage modifyvm $VM --memory 3000 --vram 64
 vboxmanage sharedfolder add $VM --name "Shared" --hostpath /home/ubuntu/Shared --automount
 vboxmanage startvm $VM --type headless
 vboxmanage list runningvms
