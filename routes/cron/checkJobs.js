@@ -1,4 +1,5 @@
 
+var vm = require('analysis/vm');
 var client = require('analysis/client');
 var server = require('analysis/server');
 
@@ -10,6 +11,9 @@ exports.schedule = '*/2 * * * * *';
 exports.exclusive = true;
 
 function initialize() {
+  // Start any virtual machines
+  vm.startAll();
+
   // Initialize the client
   client.init();
   exports.exclusive = false;
