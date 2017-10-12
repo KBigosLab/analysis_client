@@ -27,11 +27,8 @@ exports.init = function() {
   if (res && res.workerID) {
     exports.workerID = res.workerID;
 
-    addNode('Analysis_Node1');
-    addNode('Analysis_Node2');
-    addNode('Analysis_Node3');
-    addNode('Analysis_Node4');
-    addNode('Analysis_Node5');
+    for (var k=1;k<=Const.nodeCount;k++)
+      addNode('Analysis_Node'+k);
 
     return res.workerID;
   }
