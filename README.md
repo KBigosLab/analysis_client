@@ -20,3 +20,9 @@ vboxmanage list runningvms
 vboxmanage controlvm $VM screenshotpng screen.png
 vboxmanage controlvm $VM poweroff
 ```
+
+## Unregister vm and change vm uuid
+```
+vboxmanage unregistervm $VM
+vboxmanage internalcommands setvdiuuid disk-name.vdi 
+```
