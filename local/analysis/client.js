@@ -18,10 +18,18 @@ function addNode(name,workspaceDir) {
   nodes.push(new AnalysisNode(exports.workerID,name,workspaceDir));
 }
 
+function getAWSInstanceID() {
+  var shell = new Shell();
+  return shell.run('wget -q -O - http://169.254.169.254/latest/meta-data/instance-id',[]);
+}
+
 exports.init = function() {
 
+  var uniqueID = Const.uniqueID == '#' ? getAWSInstanceID() : Const.uniqueID;
+  console.log('Unique id: '+uniqueID);
   var res = server.post('registerWorker',{
     ip: ip.address(),
+    id: uniqueID,
   });
 
   if (res && res.workerID) {
