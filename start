@@ -1,0 +1,15 @@
+#!/bin/bash
+
+cd ~
+
+echo "Stopping processes"
+forever stopall
+
+echo "Deleting all logfiles"
+forever cleanlogs
+
+echo "Starting Analysis Client"
+cd ~/analysis_client
+rm /logs/analysis.log
+forever start -l /logs/analysis.log client.js
+
