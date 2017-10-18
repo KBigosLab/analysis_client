@@ -7,7 +7,7 @@ var path = require('path');
 var fs = require('fusion/fs');
 var ip = require('ip');
 
-var modelFiles = ['Fields.txt','%.csv','%.fit.txt','%_0.ctl','%_1.ctl','%.base.txt'];
+var modelFiles = ['%.csv','%.fit.txt','%_0.ctl','%_1.ctl','%.base.txt'];
 
 var isWaiting = false;
 var nodes = [];
