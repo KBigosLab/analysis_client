@@ -71,6 +71,19 @@ exports.isWaiting = function() {
   return isWaiting;
 }
 
+exports.computeBaseModel = function(job) {
+  // Make sure the necessary drug model exists
+  cloneDrugModel(job);
+
+  // Place the analysis on a node
+  exports.workerID = 0;
+  for (var k in Const.nodes)
+    addNode(Const.nodes[k].name,Const.nodes[k].workspace);
+  var node = getAvailableNode();
+  var baseObjFn = node.computeBaseModel(job);
+  console.log('Base objective function: '+baseObjFn);
+}
+
 exports.process = function(job) {
   if (isWaiting) return;
 

@@ -26,7 +26,7 @@ function computeIds(rows) {
   return id2idx;
 }
 
-Node.prototype.copyDrugModel = function(analysis,analysisName,options) {
+Node.prototype.createAnalysisDir = function(analysis,analysisName,options) {
   options = options || {};
 
   var model = analysis.model;
@@ -62,31 +62,46 @@ Node.prototype.copyDrugModel = function(analysis,analysisName,options) {
   shell.run('cp ? .',[path.join(Const.modelDir,'Analyze.bat')]);
 
   // Modify the csv file
-  var outputCSV = '';
-  var rows = csv.csv2json(path.join(analysisDir,model.name+'.csv'));
-  if (options.type == 'gene') rows[0].push('A');
+  if (!options.noCSVMod) {
+    var outputCSV = '';
+    var rows = csv.csv2json(path.join(analysisDir,model.name+'.csv'));
+    if (options.type == 'gene') rows[0].push('A');
 
-  var omitted = {};
-  var id2idx = computeIds(rows);
-  outputCSV += rows[0].join(',')+'\r\n';
-  for (var k=1;k<rows.length;k++) {
-    var id = rows[k][0];
-    rows[k][0] = id2idx[id];
-    var geneValue = analysis.regressor[id];
-    if (geneValue == 0 || geneValue == 1 || geneValue == 2) {
-      if (options.type == 'gene') rows[k].push(geneValue);
+    var omitted = {};
+    var id2idx = computeIds(rows);
+    outputCSV += rows[0].join(',')+'\r\n';
+    for (var k=1;k<rows.length;k++) {
+      var id = rows[k][0];
+      rows[k][0] = id2idx[id];
+      var geneValue = analysis.regressor[id];
+      if (geneValue == 0 || geneValue == 1 || geneValue == 2) {
+        if (options.type == 'gene') rows[k].push(geneValue);
+        outputCSV += rows[k].join(',')+'\r\n';
+      } else omitted[id] = true;
+    }
+    omitted = _.map(omitted,function(v,i) { return i });
+    if (omitted.length) {
+      console.log('******************');
+      console.log('******************');
+      console.log('******************');
+      console.log(omitted);
+      console.log('******************');
+      console.log('******************');
+      console.log('******************');
+    }
+  } else {
+    var outputCSV = '';
+    var rows = csv.csv2json(path.join(analysisDir,model.name+'.csv'));
+    if (options.type == 'gene') rows[0].push('A');
+
+    var omitted = {};
+    var id2idx = computeIds(rows);
+    outputCSV += rows[0].join(',')+'\r\n';
+    for (var k=1;k<rows.length;k++) {
+      var id = rows[k][0];
+      rows[k][0] = id2idx[id];
       outputCSV += rows[k].join(',')+'\r\n';
-    } else omitted[id] = true;
-  }
-  omitted = _.map(omitted,function(v,i) { return i });
-  if (omitted.length) {
-    console.log('******************');
-    console.log('******************');
-    console.log('******************');
-    console.log(omitted);
-    console.log('******************');
-    console.log('******************');
-    console.log('******************');
+    }
   }
   fs.writeFile(path.join(analysisDir,model.name+'.csv'),outputCSV);
 }
@@ -118,7 +133,7 @@ Node.prototype.analyze = function(analysis,options) {
   shell.run('rm -rf '+analysisName,[]);
 
   // Get drug model for the analysis
-  this.copyDrugModel(analysis,analysisName,options);
+  this.createAnalysisDir(analysis,analysisName,options);
 
   // Run an analysis instance
   var instance = new AnalysisInstance(this.workerID,this.workspaceDir,analysis.model.key,this.name,analysis.job.jobID,analysisName);
@@ -127,6 +142,29 @@ Node.prototype.analyze = function(analysis,options) {
   instance.waitForResults();
 
   return instance;
+}
+
+Node.prototype.computeBaseModel = function(analysis) {
+  var analysisName = 'base_model_'+analysis.model.name;
+
+  // Make sure an old analysis directory isn't present
+  var shell = new Shell();
+  shell.cd(path.join(this.workspaceDir,this.name));
+  shell.run('rm -rf '+analysisName,[]);
+
+  // Get drug model for the analysis
+  this.createAnalysisDir(analysis,analysisName,{type: 'base', noCSVMod: true});
+
+  // Run an analysis instance
+  var instance = new AnalysisInstance(0,this.workspaceDir,analysis.model.key,this.name,0,analysisName);
+  instance.run();
+
+  // Wait for analysis to complete
+  instance.waitForResults();
+
+  // Extract base objective function from summary stats
+  var stats = instance.getSummary();
+  return stats.ObjFn;
 }
 
 Node.prototype.run = function(analysis) {
