@@ -7,7 +7,7 @@ var path = require('path');
 var fs = require('fusion/fs');
 var ip = require('ip');
 
-var modelFiles = ['Fields.txt','%.csv','%.fit.txt','%_0.ctl','%_1.ctl','%.base.txt'];
+var modelFiles = ['%.csv','%.fit.txt','%_0.ctl','%_1.ctl','%.base.txt'];
 
 var isWaiting = false;
 var nodes = [];
@@ -69,6 +69,19 @@ function getAvailableNode() {
 
 exports.isWaiting = function() {
   return isWaiting;
+}
+
+exports.computeBaseModel = function(job) {
+  // Make sure the necessary drug model exists
+  cloneDrugModel(job);
+
+  // Place the analysis on a node
+  exports.workerID = 0;
+  for (var k in Const.nodes)
+    addNode(Const.nodes[k].name,Const.nodes[k].workspace);
+  var node = getAvailableNode();
+  var baseObjFn = node.computeBaseModel(job);
+  console.log('Base objective function: '+baseObjFn);
 }
 
 exports.process = function(job) {
