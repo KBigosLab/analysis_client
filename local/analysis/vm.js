@@ -13,11 +13,13 @@ function isRunning(list,name) {
 }
 
 exports.startAll = function() {
-  var shell = new Shell();
-  var list = shell.run('vboxmanage list runningvms',[]).split('\n');
+  if (Const.vms && Const.vms.length) {
+    var shell = new Shell();
+    var list = shell.run('vboxmanage list runningvms',[]).split('\n');
 
-  for (var k in Const.vms) {
-    if (!isRunning(list,Const.vms[k])) startVM(Const.vms[k]);
+    for (var k in Const.vms) {
+      if (!isRunning(list,Const.vms[k])) startVM(Const.vms[k]);
+    }
   }
 }
 

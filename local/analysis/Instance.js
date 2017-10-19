@@ -32,13 +32,20 @@ Instance.prototype.run = function() {
   if (!this.inProgress()) {
     this.rm('Done');
     this.rm('Summary.txt');
-    fs.writeFile(path.join(this.analysisDir,'Ready'),'');
+    fs.writeFile(path.join(this.analysisDir,'Ready'),new Buffer(64000));
   }
 }
 
 Instance.prototype.waitForResults = function() {
   while(true) {
-    if (fs.exists(this.file('Done'))) return;
+    if (fs.exists(this.file('Done')) && fs.exists(this.file('Summary.txt'))) return;
+    sleep(500);
+  }
+}
+
+Instance.prototype.waitForFITFile = function() {
+  while(true) {
+    if (fs.exists(this.file(path.join('NONMEM.g77','NONMEM.smr'))) && fs.exists(this.file(path.join('NONMEM.g77','nonmem.fit')))) return;
     sleep(500);
   }
 }
@@ -83,6 +90,8 @@ Instance.prototype.pushResults = function() {
   });
 
   // Upload fit file
+  if (!summary.Error) this.waitForFITFile();
+
   this.pushNonmemResult('nonmem.fit');
   this.pushNonmemResult('NONMEM.smr');
 }

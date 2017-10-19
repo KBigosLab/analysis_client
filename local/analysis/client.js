@@ -84,6 +84,26 @@ exports.computeBaseModel = function(job) {
   console.log('Base objective function: '+baseObjFn);
 }
 
+function nodeExists(nodeName,workspaceDir) {
+  console.log('testing '+nodeName+' '+workspaceDir);
+  for (var k in nodes)
+    if (nodeName == nodes[k].name && workspaceDir == nodes[k].workspaceDir) return true;
+  return false;
+}
+
+exports.checkForNewNodes = function() {
+  if (Const.nodeDir) {
+    var workspaces = fs.readdir(Const.nodeDir);
+    for (var k in workspaces) {
+      var workspaceDir = path.join(Const.nodeDir,workspaces[k]);
+      var nodeDirs = fs.readdir(workspaceDir);
+      for (var j in nodeDirs) {
+        if (!nodeExists(nodeDirs[j],workspaceDir)) addNode(nodeDirs[j],workspaceDir);
+      }
+    }
+  }
+}
+
 exports.process = function(job) {
   if (isWaiting) return;
 
