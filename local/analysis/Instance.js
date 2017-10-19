@@ -32,7 +32,7 @@ Instance.prototype.run = function() {
   if (!this.inProgress()) {
     this.rm('Done');
     this.rm('Summary.txt');
-    fs.writeFile(path.join(this.analysisDir,'Ready'),'');
+    fs.writeFile(path.join(this.analysisDir,'Ready'),new Buffer(64000));
   }
 }
 

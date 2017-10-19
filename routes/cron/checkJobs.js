@@ -16,6 +16,10 @@ function initialize() {
 
   // Initialize the client
   client.init();
+
+  // Check for dynamic nodes
+  client.checkForNewNodes();
+
   exports.exclusive = false;
 }
 
