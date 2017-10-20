@@ -11,11 +11,10 @@ var modelFiles = ['%.csv','%.fit.txt','%_0.ctl','%_1.ctl','%.base.txt'];
 
 var isWaiting = false;
 var nodes = [];
+var workspace2workerID = {};
 
-exports.workerID = null;
-
-function addNode(name,workspaceDir) {
-  nodes.push(new AnalysisNode(exports.workerID,name,workspaceDir));
+function addNode(workerID,name,workspaceDir) {
+  nodes.push(new AnalysisNode(workerID,name,workspaceDir));
 }
 
 function getAWSInstanceID() {
@@ -33,10 +32,8 @@ exports.init = function() {
   });
 
   if (res && res.workerID) {
-    exports.workerID = res.workerID;
-
     for (var k in Const.nodes)
-      addNode(Const.nodes[k].name,Const.nodes[k].workspace);
+      addNode(res.workerID,Const.nodes[k].name,Const.nodes[k].workspace);
 
     return res.workerID;
   }
@@ -76,9 +73,8 @@ exports.computeBaseModel = function(job) {
   cloneDrugModel(job);
 
   // Place the analysis on a node
-  exports.workerID = 0;
   for (var k in Const.nodes)
-    addNode(Const.nodes[k].name,Const.nodes[k].workspace);
+    addNode(0,Const.nodes[k].name,Const.nodes[k].workspace);
   var node = getAvailableNode();
   var baseObjFn = node.computeBaseModel(job);
   console.log('Base objective function: '+baseObjFn);
@@ -90,30 +86,55 @@ function nodeExists(nodeName,workspaceDir) {
   return false;
 }
 
+function getWorkerIDForWorkspace(workspace) {
+  var workerID = workspace2workerID[workspace];
+
+  if (!workerID) {
+    var res = server.post('registerWorker',{
+      ip: ip.address(),
+      id: workspace,
+    });
+    workerID = res.workerID;
+    workspace2workerID[workspace] = workerID;
+  }
+
+  return workerID;
+}
+
 exports.checkForNewNodes = function() {
   if (Const.nodeDir) {
     var workspaces = fs.readdir(Const.nodeDir);
     for (var k in workspaces) {
+      var workerID = getWorkerIDForWorkspace(workspaces[k]);
       var workspaceDir = path.join(Const.nodeDir,workspaces[k]);
       var nodeDirs = fs.readdir(workspaceDir);
       for (var j in nodeDirs) {
-        if (!nodeExists(nodeDirs[j],workspaceDir)) addNode(nodeDirs[j],workspaceDir);
+        if (!nodeExists(nodeDirs[j],workspaceDir)) addNode(workerID,nodeDirs[j],workspaceDir);
       }
     }
   }
 }
 
-exports.process = function(job) {
+exports.next = function() {
   if (isWaiting) return;
 
   // Make sure the necessary drug model exists
   isWaiting = true;
-  cloneDrugModel(job);
 
-  // Place the analysis on a node
+  // Select a node to process the analysis
   var node = getAvailableNode();
-  isWaiting = false;
 
-  node.run(job);
+  var job = server.post('nextJob',{
+    workerID: node.workerID,
+  });
+
+  if (job && job.model) {
+    cloneDrugModel(job);
+
+    isWaiting = false;
+
+    node.run(job);
+
+  } else isWaiting = false;
 }
 
