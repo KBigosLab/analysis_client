@@ -9,6 +9,7 @@ var s3 = require('analysis/s3');
 function Instance(workerID,workspaceDir,modelKey,node,id,name) {
   this.workerID = workerID;
   this.workspaceDir = workspaceDir;
+  this.omitted = [];
   this.modelKey = modelKey;
   this.node = node;
   this.id = id;
@@ -32,21 +33,45 @@ Instance.prototype.run = function() {
   if (!this.inProgress()) {
     this.rm('Done');
     this.rm('Summary.txt');
-    fs.writeFile(path.join(this.analysisDir,'Ready'),new Buffer(64000));
+
+    var lines = [];
+    for (var k in this.files) {
+      var stats = fs.stat(path.join(this.analysisDir,this.files[k]));
+      lines.push(this.files[k]+'='+stats.size);
+    }
+    lines.push('-=-');
+    fs.writeFile(path.join(this.analysisDir,'Ready'),lines.join('\r\n'));
   }
+}
+
+Instance.prototype.hasAllFiles = function() {
+  // Extract data into the done object
+  var done = {};
+  var lines = fs.readFile(this.file('Done'),'utf8').split('\r\n');
+  for (var k in lines) {
+    if (!lines[k]) continue;
+    var parts = lines[k].split('=');
+    done[parts[0]] = parts[1];
+  }
+
+  // Verify that all returned files are the right size
+  if (done['-'] == '-') {
+    for (var filename in done) {
+      if (filename == '-') continue;
+      if (fs.exists(path.join(this.analysisDir,filename))) {
+        var stats = fs.stat(path.join(this.analysisDir,filename));
+        if (+done[filename] != stats.size) return false;
+      } else return false;
+    }
+  } else return false;
+
+  return true;
 }
 
 Instance.prototype.waitForResults = function() {
   while(true) {
-    if (fs.exists(this.file('Done')) && fs.exists(this.file('Summary.txt'))) return;
-    sleep(500);
-  }
-}
-
-Instance.prototype.waitForFITFile = function() {
-  while(true) {
-    if (fs.exists(this.file(path.join('NONMEM.g77','NONMEM.smr'))) && fs.exists(this.file(path.join('NONMEM.g77','nonmem.fit')))) return;
-    sleep(500);
+    if (fs.exists(this.file('Done')) && this.hasAllFiles()) return;
+    sleep(100);
   }
 }
 
@@ -67,7 +92,9 @@ Instance.prototype.pushNonmemResult = function(name) {
 }
 
 Instance.prototype.getSummary = function() {
-  return convert2obj(fs.readFile(this.file('Summary.txt'),'utf8').split('\r\n'));
+  var obj = convert2obj(fs.readFile(this.file('Summary.txt'),'utf8').split('\r\n'));
+  obj.Missing = this.omitted.length;
+  return obj;
 }
 
 Instance.prototype.remove = function() {
@@ -90,8 +117,6 @@ Instance.prototype.pushResults = function() {
   });
 
   // Upload fit file
-  if (!summary.Error) this.waitForFITFile();
-
   this.pushNonmemResult('nonmem.fit');
   this.pushNonmemResult('NONMEM.smr');
 }

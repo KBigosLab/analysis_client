@@ -85,7 +85,6 @@ exports.computeBaseModel = function(job) {
 }
 
 function nodeExists(nodeName,workspaceDir) {
-  console.log('testing '+nodeName+' '+workspaceDir);
   for (var k in nodes)
     if (nodeName == nodes[k].name && workspaceDir == nodes[k].workspaceDir) return true;
   return false;

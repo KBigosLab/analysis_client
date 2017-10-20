@@ -26,9 +26,11 @@ function computeIds(rows) {
   return id2idx;
 }
 
-Node.prototype.createAnalysisDir = function(analysis,analysisName,options) {
+Node.prototype.createAnalysisDir = function(analysis,instance,analysisName,options) {
   options = options || {};
 
+  var files = [];
+  instance.files = files;
   var model = analysis.model;
   var drugModelDir = path.join(Const.modelDir,model.key);
   var shell = new Shell();
@@ -40,7 +42,9 @@ Node.prototype.createAnalysisDir = function(analysis,analysisName,options) {
 
   function cp(from,to) {
     var file = from.replace(/\%/g,model.name);
-    shell.run('cp ? ?',[path.join(drugModelDir,file),to.replace(/\%/g,model.name)]);
+    var toFile = to.replace(/\%/g,model.name);
+    files.push(toFile);
+    shell.run('cp ? ?',[path.join(drugModelDir,file),toFile]);
   }
 
   // Copy the model
@@ -60,6 +64,7 @@ Node.prototype.createAnalysisDir = function(analysis,analysisName,options) {
 
   // Copy Analyze.bat
   shell.run('cp ? .',[path.join(Const.modelDir,'Analyze.bat')]);
+  files.push('Analyze.bat');
 
   // Modify the csv file
   if (!options.noCSVMod) {
@@ -89,6 +94,7 @@ Node.prototype.createAnalysisDir = function(analysis,analysisName,options) {
       console.log('******************');
       console.log('******************');
     }
+    instance.omitted = omitted;
   } else {
     var outputCSV = '';
     var rows = csv.csv2json(path.join(analysisDir,model.name+'.csv'));
@@ -132,11 +138,13 @@ Node.prototype.analyze = function(analysis,options) {
   shell.cd(path.join(this.workspaceDir,this.name));
   shell.run('rm -rf '+analysisName,[]);
 
+  // Create analysis instance
+  var instance = new AnalysisInstance(this.workerID,this.workspaceDir,analysis.model.key,this.name,analysis.job.jobID,analysisName);
+
   // Get drug model for the analysis
-  this.createAnalysisDir(analysis,analysisName,options);
+  this.createAnalysisDir(analysis,instance,analysisName,options);
 
   // Run an analysis instance
-  var instance = new AnalysisInstance(this.workerID,this.workspaceDir,analysis.model.key,this.name,analysis.job.jobID,analysisName);
   instance.run();
 
   instance.waitForResults();
@@ -152,11 +160,13 @@ Node.prototype.computeBaseModel = function(analysis) {
   shell.cd(path.join(this.workspaceDir,this.name));
   shell.run('rm -rf '+analysisName,[]);
 
+  // Create analysis instance
+  var instance = new AnalysisInstance(0,this.workspaceDir,analysis.model.key,this.name,0,analysisName);
+
   // Get drug model for the analysis
-  this.createAnalysisDir(analysis,analysisName,{type: 'base', noCSVMod: true});
+  this.createAnalysisDir(analysis,instance,analysisName,{type: 'base', noCSVMod: true});
 
   // Run an analysis instance
-  var instance = new AnalysisInstance(0,this.workspaceDir,analysis.model.key,this.name,0,analysisName);
   instance.run();
 
   // Wait for analysis to complete
