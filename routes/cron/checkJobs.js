@@ -26,12 +26,6 @@ function initialize() {
 exports.main = function($C) {
   if ($C.count == 0) initialize();
 
-  if (client.workerID && !client.isWaiting()) {
-    var res = server.post('nextJob',{
-      workerID: client.workerID,
-    });
-
-    if (res && res.model) client.process(res);
-  }
+  if (!client.isWaiting()) client.next();
 }
 
