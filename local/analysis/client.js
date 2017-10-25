@@ -104,7 +104,10 @@ function getWorkerIDForWorkspace(workspace) {
 exports.checkForNewNodes = function() {
   if (Const.nodeDir) {
     var workspaces = fs.readdir(Const.nodeDir);
+
     for (var k in workspaces) {
+      if (~workspaces[k].indexOf('.')) continue;
+
       var workerID = getWorkerIDForWorkspace(workspaces[k]);
       var workspaceDir = path.join(Const.nodeDir,workspaces[k]);
       var nodeDirs = fs.readdir(workspaceDir);
