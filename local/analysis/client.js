@@ -118,6 +118,25 @@ exports.checkForNewNodes = function() {
   }
 }
 
+function checkMAF(workerID,analysis) {
+
+  for (var k in analysis.regressor) {
+    if (+analysis.regressor[k] == 1 || +analysis.regressor[k] == 2) return true;
+  }
+
+  // If we make it this far, there are no 1's and 2's in the regressor
+  console.log('***************');
+  console.log('**  Low MAF  **');
+  console.log('***************');
+
+  server.post('submitJob',{
+    workerID: workerID,
+    jobID: analysis.job.jobID,
+    summary: {'Error': 'Low MAF'},
+  });
+
+}
+
 exports.next = function() {
   if (isWaiting) return;
 
@@ -131,7 +150,8 @@ exports.next = function() {
     workerID: node.workerID,
   });
 
-  if (job && job.model) {
+  if (job && job.model && checkMAF(node.workerID,job)) {
+
     cloneDrugModel(job);
 
     isWaiting = false;
