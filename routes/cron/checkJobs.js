@@ -2,6 +2,7 @@
 var vm = require('analysis/vm');
 var client = require('analysis/client');
 var server = require('analysis/server');
+var sleep = require('fusion/sleep');
 
 // This sets how often checkJobs runs
 exports.schedule = '*/2 * * * * *';
@@ -11,6 +12,10 @@ exports.schedule = '*/2 * * * * *';
 exports.exclusive = true;
 
 function initialize() {
+  var delay = Math.round(Math.random()*30000);
+  console.log('Will start in '+delay+'ms');
+  sleep(delay);
+
   // Start any virtual machines
   vm.startAll();
 
