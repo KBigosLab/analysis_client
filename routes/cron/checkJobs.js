@@ -3,6 +3,7 @@ var vm = require('analysis/vm');
 var client = require('analysis/client');
 var server = require('analysis/server');
 var sleep = require('fusion/sleep');
+var watch = require('analysis/watch');
 
 // This sets how often checkJobs runs
 exports.schedule = '*/2 * * * * *';
@@ -25,11 +26,19 @@ function initialize() {
   // Check for dynamic nodes
   client.checkForNewNodes();
 
-  exports.exclusive = false;
+  // exports.exclusive = false;
 }
+
+var watchSet = false;
 
 exports.main = function($C) {
   if ($C.count == 0) initialize();
+
+  // Set cloud watch metrics
+  if ($C.count > 60 && !watchSet && Const.wantsCloudWatch) {
+    watch.set();
+    watchSet = true;
+  }
 
   if (!client.isWaiting()) client.next();
 }
