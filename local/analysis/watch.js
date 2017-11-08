@@ -25,6 +25,28 @@ function putMetricAlarm(region,params) {
   Fiber.yield();
 }
 
+function setAlarmState(region,params) {
+  var cw = new CloudWatch({
+    region: region,
+    accessKeyId: Const.AWSAccessKeyID,
+    secretAccessKey: Const.AWSSecretAccessKey,
+    apiVersion: '2010-08-01',
+  });
+
+  // Lowercase "fiber" will now reference the currently running fiber
+  var fiber = Fiber.current;
+
+  cw.setAlarmState(params, function(err, data) {
+    console.log(err);
+    console.log(data);
+    // This kicks the execution back to where the Fiber.yield() statement stopped it
+    fiber.resume();
+  });
+
+  // Yield so the server can do something else, since fs access is slow!
+  Fiber.yield();
+}
+
 function getAWSInstanceID() {
   var shell = new Shell();
   return shell.run('wget -q -O - http://169.254.169.254/latest/meta-data/instance-id',[]);
@@ -36,12 +58,26 @@ function getAWSRegion() {
   return region.slice(0,region.length-1);
 }
 
+exports.reset = function() {
+
+  var region = getAWSRegion();
+  var instanceId = getAWSInstanceID();
+
+  setAlarmState(region,{
+    AlarmName: 'CPU_Utilization_'+instanceId,
+    StateReason: 'Reset for system restart',
+    StateValue: 'OK',
+    StateReasonData: '{"version": "1.0"}'
+  });
+}
+
 exports.set = function() {
 
   var region = getAWSRegion();
+  var instanceId = getAWSInstanceID();
 
   putMetricAlarm(region,{
-    AlarmName: 'Web_Server_CPU_Utilization',
+    AlarmName: 'CPU_Utilization_'+instanceId,
     ComparisonOperator: 'LessThanThreshold',
     EvaluationPeriods: 2,
     MetricName: 'CPUUtilization',
@@ -54,7 +90,7 @@ exports.set = function() {
     AlarmDescription: 'Alarm when server CPU drops below 80%',
     Dimensions: [{
       Name: 'InstanceId',
-      Value: getAWSInstanceID(),
+      Value: instanceId,
     }],
   });
 

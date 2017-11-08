@@ -8,6 +8,15 @@ forever stopall
 echo "Deleting all logfiles"
 forever cleanlogs
 
+echo "Deleting analysis directories"
+cd /home/ubuntu/Shared/Workspace/
+rm -rf Analysis_Node1
+mkdir Analysis_Node1
+
+cd /home/ubuntu/Shared2/Workspace/
+rm -rf Analysis_Node2
+mkdir Analysis_Node2
+
 echo "Starting Analysis Client"
 cd ~/analysis_client
 rm /logs/analysis.log
