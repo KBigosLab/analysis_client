@@ -84,10 +84,10 @@ exports.set = function() {
     Namespace: 'AWS/EC2',
     Statistic: 'Average',
     Period: 300,
-    Threshold: 80.0,
+    Threshold: 65.0,
     ActionsEnabled: true,
     AlarmActions: ['arn:aws:swf:'+region+':'+Const.AWSAccountNumber+':action/actions/AWS_EC2.InstanceId.Reboot/1.0'],
-    AlarmDescription: 'Alarm when server CPU drops below 80%',
+    AlarmDescription: 'Alarm when server CPU drops below 65%',
     Dimensions: [{
       Name: 'InstanceId',
       Value: instanceId,
