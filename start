@@ -13,3 +13,5 @@ cd ~/analysis_client
 rm /logs/analysis.log
 forever start -l /logs/analysis.log client.js
 
+echo "Starting Cloud Watch"
+node run setCloudWatchAlarm
