@@ -13,12 +13,16 @@ function isRunning(list,name) {
 }
 
 exports.startAll = function() {
-  if (Const.vms && Const.vms.length) {
+  var shell = new Shell();
+  var coreCount = +shell.run('cat /proc/cpuinfo | grep processor | wc -l',[]);
+  var vms = Const.vms.slice(0,coreCount);
+
+  if (vms && vms.length) {
     var shell = new Shell();
     var list = shell.run('vboxmanage list runningvms',[]).split('\n');
 
-    for (var k in Const.vms) {
-      if (!isRunning(list,Const.vms[k])) startVM(Const.vms[k]);
+    for (var k in vms) {
+      if (!isRunning(list,vms[k])) startVM(vms[k]);
     }
   }
 }

@@ -10,6 +10,7 @@ var ip = require('ip');
 var modelFiles = ['%.csv','%.fit.txt','%_0.ctl','%_1.ctl','%.base.txt'];
 
 var isWaiting = false;
+var availableNodes = [];
 var nodes = [];
 var workspace2workerID = {};
 
@@ -24,6 +25,9 @@ function getAWSInstanceID() {
 
 exports.init = function() {
 
+  // Determines which nodes are available based on the number of cores on the system
+  determineAvailableDynamicNodes();
+
   var uniqueID = Const.uniqueID == '#' ? getAWSInstanceID() : Const.uniqueID;
   console.log('Unique id: '+uniqueID);
   var res = server.post('registerWorker',{
@@ -32,8 +36,8 @@ exports.init = function() {
   });
 
   if (res && res.workerID) {
-    for (var k in Const.nodes)
-      addNode(res.workerID,Const.nodes[k].name,Const.nodes[k].workspace);
+    for (var k in availableNodes)
+      addNode(res.workerID,availableNodes[k].name,availableNodes[k].workspace);
 
     return res.workerID;
   }
@@ -57,6 +61,12 @@ function cloneDrugModel(analysis) {
   }
 }
 
+function determineAvailableDynamicNodes() {
+  var shell = new Shell();
+  var coreCount = +shell.run('cat /proc/cpuinfo | grep processor | wc -l',[]);
+  availableNodes = Const.nodes.slice(0,coreCount);
+}
+
 function getAvailableNode() {
   while(true) {
     for (var k in nodes) if (!nodes[k].isRunning) return nodes[k];
@@ -69,12 +79,15 @@ exports.isWaiting = function() {
 }
 
 exports.computeBaseModel = function(job) {
+  // Use the existing node list as the available nodes
+  availableNodes = Const.nodes;
+
   // Make sure the necessary drug model exists
   cloneDrugModel(job);
 
   // Place the analysis on a node
-  for (var k in Const.nodes)
-    addNode(0,Const.nodes[k].name,Const.nodes[k].workspace);
+  for (var k in availableNodes)
+    addNode(0,availableNodes[k].name,availableNodes[k].workspace);
   var node = getAvailableNode();
   var baseObjFn = node.computeBaseModel(job);
   console.log('Base objective function: '+baseObjFn);
