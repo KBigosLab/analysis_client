@@ -8,6 +8,8 @@ exports.main = function() {
     sleep(60000*15);
 
     watch.set();
+    sleep(5000);
+    watch.reset();
   }
 }
 
