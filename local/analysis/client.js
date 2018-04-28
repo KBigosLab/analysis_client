@@ -63,7 +63,7 @@ function cloneDrugModel(analysis) {
 
 function determineAvailableDynamicNodes() {
   var shell = new Shell();
-  var coreCount = +shell.run('cat /proc/cpuinfo | grep processor | wc -l',[]);
+  var coreCount = +shell.run('cat /proc/cpuinfo | grep processor | wc -l',[]) || 1;
   availableNodes = Const.nodes.slice(0,coreCount);
 }
 
