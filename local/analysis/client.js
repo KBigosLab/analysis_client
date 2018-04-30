@@ -89,8 +89,12 @@ exports.computeBaseModel = function(job) {
   for (var k in availableNodes)
     addNode(0,availableNodes[k].name,availableNodes[k].workspace);
   var node = getAvailableNode();
+
+  console.log('Computing base model');
   var baseObjFn = node.computeBaseModel(job);
   console.log('Base objective function: '+baseObjFn);
+
+  return baseObjFn;
 }
 
 function nodeExists(nodeName,workspaceDir) {
