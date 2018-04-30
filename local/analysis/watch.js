@@ -86,7 +86,8 @@ exports.set = function() {
     Period: 300,
     Threshold: 65.0,
     ActionsEnabled: true,
-    AlarmActions: ['arn:aws:swf:'+region+':'+Const.AWSAccountNumber+':action/actions/AWS_EC2.InstanceId.Reboot/1.0'],
+//    AlarmActions: ['arn:aws:swf:'+region+':'+Const.AWSAccountNumber+':action/actions/AWS_EC2.InstanceId.Reboot/1.0'],
+    AlarmActions: ['arn:aws:swf:'+region+':'+Const.AWSAccountNumber+':action/actions/AWS_EC2.InstanceId.Terminate/1.0'],
     AlarmDescription: 'Alarm when server CPU drops below 65%',
     Dimensions: [{
       Name: 'InstanceId',
