@@ -60,6 +60,7 @@ function checkFITFile(dirName,modelName,modelDir) {
           hasGene = true;
         }
       }
+      break;
     }
   }
 
@@ -103,18 +104,20 @@ function filterCSV(dirName,modelName,modelDir) {
   var res = server.post('getSubjectList',{});
   if (!res.subjects) throw new Error('Could not get subject list.');
   var subjIndex = _.indexBy(res.subjects,_.identity);
+  delete subjIndex[''];
 
   // Save the original csv
   if (!fs.exists(path.join(dirName,modelName,modelName+'.csv.orig'))) sh.run('mv ? ?',[modelName+'.csv',modelName+'.csv.orig']);
 
   // Create the filtered CSV
-  var lines = fs.readFile(path.join(dirName,modelName,modelName+'.csv.orig'),'utf8').split('\n');
-  var res = [lines[0]];
+  var lines = fs.readFile(path.join(dirName,modelName,modelName+'.csv.orig'),'utf8').split('\r\n');
+  var csv = [lines[0]];
   for (var k=1;k<lines.length;k++) {
     var row = lines[k].split(',');
-    if (subjIndex[row[0]]) res.push(lines[k]);
+    if (subjIndex[row[0]]) csv.push(lines[k]);
   }
-  fs.writeFile(path.join(dirName,modelName,modelName+'.csv'),res.join('\n'));
+
+  fs.writeFile(path.join(dirName,modelName,modelName+'.csv'),csv.join('\r\n'));
   console.log('Wrote '+modelName+'.csv');
 }
 
