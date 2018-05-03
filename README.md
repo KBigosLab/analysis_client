@@ -1,6 +1,11 @@
 # analysis_client
 Client for distributed nonmem analysis
 
+## Upload a new model
+```
+node run import /home/ubuntu/gwa_import
+```
+
 ## Set Virtual Box time offset
 ```
 VBoxManage setextradata $VM "VBoxInternal/Devices/VMMDev/0/Config/GetHostTimeDisabled" 1
