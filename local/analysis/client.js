@@ -154,6 +154,11 @@ function checkMAF(workerID,analysis) {
 
 }
 
+exports.hasTimedOut = function() {
+  for (var k in nodes) if (nodes[k].isRunning && nodes[k].hasTimedOut()) return true;
+  return false;
+}
+
 exports.next = function() {
   if (isWaiting) return;
 
