@@ -32,6 +32,10 @@ function initialize() {
 exports.main = function($C) {
   if ($C.count == 0) initialize();
 
+  // Check for analysis timeout
+  if (client.hasTimedOut()) process.exit();
+
+  // Check for next job
   if (!client.isWaiting()) client.next();
 }
 

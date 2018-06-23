@@ -7,6 +7,9 @@ var path = require('path');
 var _ = require('underscore');
 var Shell = require('fusion/Shell');
 
+// Maximum amount of time analysis can run for without timing out
+var timeout = 600; // 10 minutes
+
 function Node(workerID,name,workspaceDir) {
   this.workerID = workerID;
   this.name = name;
@@ -177,10 +180,19 @@ Node.prototype.computeBaseModel = function(analysis) {
   return stats.ObjFn;
 }
 
+Node.prototype.hasTimedOut = function() {
+  var currentTime = new Date();
+  var elapsedTime = Math.round(+(currentTime-this.startTime)/1000);
+  console.log('elapsedTime: '+elapsedTime+'s');
+  console.log('timeout: '+timeout+'s');
+  console.log('hasTimedOut: '+(elapsedTime > timeout));
+  return elapsedTime > timeout;
+}
+
 Node.prototype.run = function(analysis) {
 
   // Reserve this node
-  var startTime = new Date();
+  this.startTime = new Date();
   this.isRunning = true;
 
   // Determine if the cached base model can be used
@@ -212,7 +224,7 @@ Node.prototype.run = function(analysis) {
   var stopTime = new Date();
 
   console.log('**************************************');
-  console.log('Done with analysis: Ran in '+(stopTime-startTime)+'ms');
+  console.log('Done with analysis: Ran in '+(stopTime-this.startTime)+'ms');
   console.log('**************************************');
 
   // Free the node to do another job
