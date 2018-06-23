@@ -183,9 +183,6 @@ Node.prototype.computeBaseModel = function(analysis) {
 Node.prototype.hasTimedOut = function() {
   var currentTime = new Date();
   var elapsedTime = Math.round(+(currentTime-this.startTime)/1000);
-  console.log('elapsedTime: '+elapsedTime+'s');
-  console.log('timeout: '+timeout+'s');
-  console.log('hasTimedOut: '+(elapsedTime > timeout));
   return elapsedTime > timeout;
 }
 
