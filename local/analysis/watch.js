@@ -2,6 +2,8 @@
 var CloudWatch = require('aws-sdk/clients/cloudwatch');
 var Shell = require('fusion/Shell');
 var Fiber = require('fibers');
+var sleep = require('fusion/sleep');
+var _ = require('underscore');
 
 function putMetricAlarm(region,params) {
   var cw = new CloudWatch({
@@ -96,4 +98,97 @@ exports.set = function() {
   });
 
 }
+
+function listAlarms(region,params) {
+  var cw = new CloudWatch({
+    region: region,
+    accessKeyId: Const.AWSAccessKeyID,
+    secretAccessKey: Const.AWSSecretAccessKey,
+    apiVersion: '2010-08-01',
+  });
+
+  // Lowercase "fiber" will now reference the currently running fiber
+  var fiber = Fiber.current;
+
+  var res = null;
+  cw.describeAlarms(params, function(err, data) {
+    console.log(err);
+    res = data;
+    // This kicks the execution back to where the Fiber.yield() statement stopped it
+    fiber.resume();
+  });
+
+  // Yield so the server can do something else, since fs access is slow!
+  Fiber.yield();
+
+  return res;
+}
+
+function listAlarms(region,params) {
+  var cw = new CloudWatch({
+    region: region,
+    accessKeyId: Const.AWSAccessKeyID,
+    secretAccessKey: Const.AWSSecretAccessKey,
+    apiVersion: '2010-08-01',
+  });
+
+  // Lowercase "fiber" will now reference the currently running fiber
+  var fiber = Fiber.current;
+
+  var res = null;
+  cw.describeAlarms(params, function(err, data) {
+    console.log(err);
+    res = data;
+    // This kicks the execution back to where the Fiber.yield() statement stopped it
+    fiber.resume();
+  });
+
+  // Yield so the server can do something else, since fs access is slow!
+  Fiber.yield();
+
+  return res;
+}
+
+function deleteAlarm(region,params) {
+  var cw = new CloudWatch({
+    region: region,
+    accessKeyId: Const.AWSAccessKeyID,
+    secretAccessKey: Const.AWSSecretAccessKey,
+    apiVersion: '2010-08-01',
+  });
+
+  // Lowercase "fiber" will now reference the currently running fiber
+  var fiber = Fiber.current;
+
+  var res = null;
+  cw.deleteAlarms(params, function(err, data) {
+    console.log(err);
+    res = data;
+    // This kicks the execution back to where the Fiber.yield() statement stopped it
+    fiber.resume();
+  });
+
+  // Yield so the server can do something else, since fs access is slow!
+  Fiber.yield();
+
+  return res;
+}
+
+function deleteAlarms(region) {
+  var list = listAlarms(region,{
+    StateValue: 'INSUFFICIENT_DATA',
+    MaxRecords: 100,
+  });
+
+  var alarms = list.MetricAlarms;
+  deleteAlarm(region,{AlarmNames: _.map(alarms,'AlarmName')});
+}
+
+exports.deleteInactiveAlarms = function(region) {
+  for (var k=0;k<5;k++) {
+    deleteAlarms(region);
+    sleep(1000);
+  }
+}
+
 
