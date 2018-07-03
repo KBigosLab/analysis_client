@@ -8,7 +8,7 @@ var _ = require('underscore');
 var Shell = require('fusion/Shell');
 
 // Maximum amount of time analysis can run for without timing out
-var timeout = 360; // 6 minutes
+var timeout = 600; // 10 minutes
 
 function Node(workerID,name,workspaceDir) {
   this.workerID = workerID;
